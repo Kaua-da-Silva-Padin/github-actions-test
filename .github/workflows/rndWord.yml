@@ -1,20 +1,21 @@
-name: Get Random Word
+name: Update Random Word
 
 on:
   schedule:
     - cron: "0 * * * *" # Every hour (UTC)
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  run-script:
+  update:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -23,5 +24,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Run Random Word Script
+      - name: Run script
         run: python main.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add index.html
+
+          git diff --cached --quiet || git commit -m "Update random word"
+
+          git push
